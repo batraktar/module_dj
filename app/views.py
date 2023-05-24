@@ -47,6 +47,7 @@ class Login(LoginView):
 
 
 class PurchaseCreate(LoginRequiredMixin, CreateView):
+    template_name = 'amount.html'
     model = Purchase
     form_class = PurchaseForm
     success_url = '/'
@@ -65,10 +66,11 @@ class PurchaseCreate(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         obj = form.save(commit=False)
         product = form.product
+        amount = form.cleaned_data['prodquan']
         obj.product = product
         obj.user = self.request.user
-        product.quantity -= obj.prodquan
-        obj.User.wallet -= prodquan * product.price
+        product.quantity -= amount
+        obj.User.wallet -= amount * product.price
         with transaction.atomic():
             obj.save()
             product.save()
