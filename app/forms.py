@@ -1,9 +1,7 @@
-# from django.core.exceptions import ValidationError
-from django import forms
 from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
-from django.forms import ModelForm
+from django import forms
 
 from app.models import User, Product, Purchase
 
@@ -23,7 +21,7 @@ class UserCreateForm(UserCreationForm):
         self.fields['password2'].widget.attrs.update({'class': 'form-control'})
 
 
-class ProductForm(ModelForm):
+class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
         fields = '__all__'
@@ -41,17 +39,20 @@ class ProductForm(ModelForm):
             return quantity
 
 
-class PurchaseForm(ModelForm):
+class PurchaseForm(forms.ModelForm):
+    prodquan = forms.IntegerField(label='Quantity', min_value=1, required=True)
+
     class Meta:
         model = Purchase
-        fields = ('prodquan', )
+        fields = ['prodquan']
 
     def __init__(self, *args, **kwargs):
         if 'slug' in kwargs:
             self.slug = kwargs.pop('slug')
         if 'request' in kwargs:
             self.request = kwargs.pop('request')
-        super().__init__(*args, **kwargs)
+        super(PurchaseForm, self).__init__(*args, **kwargs)
+        self.fields['prodquan'].widget.attrs.update({'class': 'form-control'})
 
     def clean(self):
         cleaned = super().clean()
