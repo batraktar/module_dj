@@ -40,8 +40,6 @@ class ProductForm(forms.ModelForm):
 
 
 class PurchaseForm(forms.ModelForm):
-    prodquan = forms.IntegerField(label='Quantity', min_value=1, required=True)
-
     class Meta:
         model = Purchase
         fields = ['prodquan']
