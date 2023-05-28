@@ -1,4 +1,0 @@
-<form method="post" action={% url "buy_product" product.slug %}>
-{% csrf_token %}
-{{ form.as_p }}
-<button type="submit" class="btn btn-primary">Buy</button>

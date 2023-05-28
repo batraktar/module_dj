@@ -1,9 +1,12 @@
+import datetime
+
 from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
 from django import forms
+from django.utils import timezone
 
-from app.models import User, Product, Purchase
+from app.models import User, Product, Purchase, Return
 
 
 class UserCreateForm(UserCreationForm):
@@ -68,3 +71,33 @@ class PurchaseForm(forms.ModelForm):
         except Product.DoesNotExist:
             self.add_error(None, 'Error')
             messages.error(self.request, 'product is not found')
+
+
+class ReturnCreate(forms.ModelForm):
+    class Meta:
+        model = Return
+        fields = []
+
+    def __init__(self, *args, **kwargs):
+        if 'purchase_id' in kwargs:
+            self.purchase_id = kwargs.pop('purchase_id')
+        if 'request' in kwargs:
+            self.request = kwargs.pop('request')
+        super().__init__(*args, **kwargs)
+
+    def clean(self):
+        try:
+            purchase = Purchase.objects.get(pk=self.purchase_id)
+            purchase_time = purchase.purchase_time.astimezone(timezone.utc)
+            now_time = timezone.now().astimezone(timezone.utc)
+            time_correct = datetime.timedelta(minutes=3)
+            allowed_time = purchase_time + time_correct
+
+            if now_time > allowed_time:
+                self.add_error(None, 'Error')
+                messages.error(self.request, 'Too much time')
+            self.purchase = purchase
+
+        except Purchase.DoesNotExist:
+            self.add_error(None, 'Error')
+            messages.error(self.request, 'Purchase is not found')
