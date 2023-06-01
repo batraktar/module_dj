@@ -17,10 +17,10 @@ class UserCreateForm(UserCreationForm):
 
     def __init__(self, *args, **kwargs):
         super(UserCreateForm, self).__init__(*args, **kwargs)
-        self.fields['username'].widget.attrs.update({'class': 'form-input'})
-        self.fields['image'].widget.attrs.update({'class': 'form-input'})
-        self.fields['password1'].widget.attrs.update({'class': 'form-input'})
-        self.fields['password2'].widget.attrs.update({'class': 'form-input'})
+        self.fields['username'].widget.attrs.update({'class': 'form-control'})
+        self.fields['image'].widget.attrs.update({'class': 'form'})
+        self.fields['password1'].widget.attrs.update({'class': 'form-control'})
+        self.fields['password2'].widget.attrs.update({'class': 'form-control'})
 
 
 class ProductForm(ModelForm):
@@ -42,26 +42,22 @@ class ProductForm(ModelForm):
 
 
 class PurchaseForm(ModelForm):
-    prodquan = forms.IntegerField(label='Quantity', min_value=1, required=True)
-
     class Meta:
         model = Purchase
-        fields = ['prodquan']
+        fields = ('prodquan', )
 
     def __init__(self, *args, **kwargs):
         if 'slug' in kwargs:
             self.slug = kwargs.pop('slug')
         if 'request' in kwargs:
             self.request = kwargs.pop('request')
-        super(PurchaseForm, self).__init__(*args, **kwargs)
-        self.fields['prodquan'].widget.attrs.update({'class': 'form-control'})
+        super().__init__(*args, **kwargs)
 
     def clean(self):
         cleaned = super().clean()
         try:
             product = Product.objects.get(slug=self.slug)
             self.product = product
-
             if cleaned.get('prodquan') > product.quantity:
                 self.add_error(None, 'Error')
                 messages.error(self.request, 'Not enough goods')
