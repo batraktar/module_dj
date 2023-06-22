@@ -19,7 +19,7 @@ class Product(models.Model):
     def save(self, **kwargs):
         if not self.slug:
             self.slug = slugify(self.name)
-        super().save(**kwargs)
+        return super().save(**kwargs)
 
     def __str__(self):
         return self.name
